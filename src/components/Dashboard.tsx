@@ -84,7 +84,7 @@ export const Dashboard = () => {
 
     return (
         <section className="container mt-5 pt-5">
-            <h1 className="mb-5">Hello Admin</h1>
+            <h1 className="mb-5">Hello Admin Ayam</h1>
             <Row>
                 <Col>
                     <div className="card-dashboard" >
