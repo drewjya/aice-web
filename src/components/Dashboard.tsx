@@ -38,9 +38,17 @@ const getData = () => Array(10).fill({
     "Nama Distributor": "Ginanjar Laksana Arief Bachtiar"
 }
 )
+
+enum State {
+    loading, done
+}
+
+
+
 export const Dashboard = () => {
     const [sales, setSales] = useState<FormType[]>([])
-
+    const [stateMonth, setStateMonth] = useState(State.loading)
+    const [stateDay, setStateDay] = useState(State.loading)
     const [lastKey, setLastKey] = useState("");
     const [salesLastMonth, setSalesLastMonth] = useState<FormType[]>([]);
     const monthNames = ["January", "February", "March", "April", "May", "June",
@@ -62,23 +70,35 @@ export const Dashboard = () => {
     //     }
     // }
 
+
+    const getAllData = async () => {
+        try {
+            let data = await FormData.allPosts()
+            setSalesLastMonth(data?.posts ?? [])
+            setLastKey(data?.lastKey ?? "")
+            setStateMonth(State.done)
+        } catch (error) {
+            setSalesLastMonth([])
+            setLastKey("")
+            setStateMonth(State.done)
+        }
+    }
+
+    const getTodayData = async () => {
+        try {
+            let data = await FormData.postsToday()
+            setSales(data?.posts ?? [])
+            setStateDay(State.done)
+        } catch (error) {
+            setSales([])
+
+            setStateDay(State.done)
+        }
+    }
     useEffect(() => {
         // first 5 posts
-        FormData.allPosts()
-            .then((res) => {
-                setSalesLastMonth(res?.posts ?? []);
-                setLastKey(res?.lastKey ?? "");
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-        FormData.postsToday()
-            .then((res) => {
-                setSales(res?.posts ?? [])
-            }).catch((err) => {
-                console.log(err)
-            })
-
+        getAllData()
+        getTodayData()
 
     }, []);
 
@@ -89,14 +109,14 @@ export const Dashboard = () => {
                 <Col>
                     <div className="card-dashboard" >
                         <h5 style={{ fontWeight: 700 }}>Total Submission Bulan Ini</h5>
-                        <p style={{ fontSize: 64, fontWeight: 200 }}>{salesLastMonth.length === 0 ? 'Loading' : salesLastMonth.length}</p>
+                        <p style={{ fontSize: 64, fontWeight: 200 }}>{stateMonth === State.loading ? 'Loading' : salesLastMonth.length}</p>
                         <p>{monthNames[date.getMonth()]}</p>
                     </div>
                 </Col>
                 <Col>
                     <div className="card-dashboard" >
                         <h5 style={{ fontWeight: 700 }}>Total Submission Hari Ini</h5>
-                        <p style={{ fontSize: 64, fontWeight: 200 }}>{sales.length !== 0 ? sales.length : 'Loading'}</p>
+                        <p style={{ fontSize: 64, fontWeight: 200 }}>{stateDay !== State.loading ? sales.length : 'Loading'}</p>
                         <p>{today}</p>
                     </div>
                 </Col>
